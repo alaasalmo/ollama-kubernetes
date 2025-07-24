@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ollama-llm-ui
+  labels:
+    app: ollama-llm-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ollama-llm-ui
+  template:
+    metadata:
+      labels:
+        app: ollama-llm-ui
+    spec:
+      containers:
+      - name: ollama-llm-ui
+        image: alaasalmo/ollama-ui:1.1.1.1
+        ports:
+        - containerPort: 3000
+        env:
+        - name: OLLAMA_URL
+          value: "http://ollama-service-internal:11434"
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "512Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ollama-llm-service
+  labels:
+    app: ollama-llm-ui
+spec:
+  type: NodePort
+  ports:
+  - name: http
+    port: 3000
+    targetPort: 3000
+    nodePort: 30000
+  selector:
+    app: ollama-llm-ui

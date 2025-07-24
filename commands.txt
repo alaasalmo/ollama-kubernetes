@@ -1,0 +1,131 @@
+docker build -t ollama .
+
+
+mkdir -p ~/.ollama
+chmod 755 ~/.ollama
+docker network create llm-net
+docker run -d -p 11434:11434 -v ~/.ollama:/root/.ollama ollama-fedora 
+
+docker run -d --name ollama --network llm-net -p 11434:11434 -v ~/.ollama:/root/.ollama ollama-fedora
+
+docker run -d --name ollama -p 11434:11434 -v ~/.ollama:/root/.ollama ollama-fedora
+
+
+docker ps
+
+docker exec -it cfa4b926c861 ollama list
+
+docker exec -it edf5dca61584 /bin/bash
+
+
+For online system:
+ollama pull llama3
+ls ~/.ollama/models/
+
+cd ~/.ollama
+
+Zip:
+cd ~/.ollama
+tar czf ollama-models.tar.gz models modelfile-store.json
+
+Extract:
+cd ~/.ollama
+tar xzf ollama-models.tar.gz
+
+ollama list
+
+
+
+
+
+docker build -t anything-llm .
+
+
+
+
+docker run -d -p 8080:3000 \
+  --add-host=host.docker.internal:host-gateway \
+  -e OLLAMA_URL=http://host.docker.internal:11434 \
+  nextjs-ollama-ui
+
+
+New way:
+
+git clone https://github.com/jakobhoeg/nextjs-ollama-llm-ui.git
+cd nextjs-ollama-llm-ui
+
+git clone https://github.com/jakobhoeg/nextjs-ollama-llm-ui.git
+cd nextjs-ollama-llm-ui
+
+docker build -t ollama-ui .
+docker run -d -p 8080:3000 \
+  --network llm-net \
+  --add-host=host.docker.internal:host-gateway \
+  -e OLLAMA_URL=http://ollama:11434 \
+  nextjs-ollama-ui
+
+
+docker run -d -p 8080:3000 \
+  --network llm-net \
+  --add-host=host.docker.internal:host-gateway \
+  -e OLLAMA_URL=http://ollama:11434 \
+  --name nextjs-ollama \
+  nextjs-ollama-ui
+  
+
+UI will be available at http://localhost:8080
+
+
+docker inspect dee72efb3957 | grep NetworkMode
+
+
+netstat -tuln | grep 11434
+
+docker run -d --name ollama --network llm-net -v ~/.ollama:/root/.ollama -p 11434:11434 ollama/ollama
+
+
+Run Example:
+docker run -d --name ollama --network llm-net -v ~/.ollama:/root/.ollama -p 11434:11434 ollama/ollama
+docker run -d -p 8080:3000   --network llm-net   --add-host=host.docker.internal:host-gateway   -e OLLAMA_URL=http://ollama:11434   --name nextjs-ollama   nextjs-ollama-ui
+
+
+minikube service ollama-service --url
+
+
+
+
+http://172.17.214.13:30134
+
+
+docker build -t ollama-ui .
+docker images
+docker tag <image-id> alaasalmo/ollama-ui:1.0.0.0
+docker tag c82623967cae alaasalmo/ollama-ui:1.1.1.1
+docker push alaasalmo/ollama-ui:1.1.1.1
+
+minikube service ollama-llm-ui --url
+
+kubectl exec -it $(kubectl get pods -l app=ollama -o jsonpath='{.items[0].metadata.name}') -- ollama pull llama3
+
+kubectl exec -it $(kubectl get pods -l app=ollama -o jsonpath='{.items[0].metadata.name}') -- ollama pull llama3.2:1b
+
+
+kubectl exec -it $(kubectl get pods -l app=ollama -o jsonpath='{.items[0].metadata.name}') -- ollama list
+
+kubectl exec -it $(kubectl get pods -l app=ollama-llm-ui -o jsonpath='{.items[0].metadata.name}') sh
+
+
+
+curl http://ollama-service-internal:11434/api/generate -d '{"model": "llama3","prompt": "Why is the sky blue?","stream": false}'
+
+
+GUI:
+https://github.com/jakobhoeg/nextjs-ollama-llm-ui
+
+
+
+minikube ssh
+sudo mkdir /mnt/data
+sudo chmod 777 /mnt/data
+
+
