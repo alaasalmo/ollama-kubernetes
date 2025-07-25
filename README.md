@@ -9,8 +9,6 @@
 <p>With Ollama, you can run various pre-trained models locally. These models can be downloaded from the Ollama library using simple commands after installing the platform. Once installed and the desired model is selected, integration into applications is possible through Ollama’s API. Additionally, Ollama offers a web-based chat interface for interactive use.
 </p>
 
-
-
 <p><b>Comparison: ChatGPT vs. Ollama</b>
 To better understand Ollama, it’s useful to compare it with ChatGPT. ChatGPT is developed and operated by OpenAI as a proprietary, cloud-based service. It is not open-source and offers only limited customization through OpenAI’s fine-tuning tools. However, ChatGPT supports Retrieval-Augmented Generation (RAG) with minimal configuration, making it easy to integrate into RAG workflows via the OpenAI API.
 </p>
