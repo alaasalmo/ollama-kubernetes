@@ -1,3 +1,4 @@
+
 # <p width=600 align="center"><b>Building Ollama with Minikube</b></p>
 
 <p align="center">
@@ -8,6 +9,8 @@
 
 <p>With Ollama, you can run various pre-trained models locally. These models can be downloaded from the Ollama library using simple commands after installing the platform. Once installed and the desired model is selected, integration into applications is possible through Ollama’s API. Additionally, Ollama offers a web-based chat interface for interactive use.
 </p>
+
+
 
 <p><b>Comparison: ChatGPT vs. Ollama</b>
 To better understand Ollama, it’s useful to compare it with ChatGPT. ChatGPT is developed and operated by OpenAI as a proprietary, cloud-based service. It is not open-source and offers only limited customization through OpenAI’s fine-tuning tools. However, ChatGPT supports Retrieval-Augmented Generation (RAG) with minimal configuration, making it easy to integrate into RAG workflows via the OpenAI API.
@@ -44,8 +47,10 @@ Kubernetes also enables horizontal and vertical scaling. If more resources are n
 #### Build Ollama with Docker 
 We need to the two images from scratch
   * Build Ollama platform image
-  File: <a href="ollama/Dockerfile">ollama/Dockerfile</a>
-  <b>Commands:</b>
+  * File: <a href="ollama/Dockerfile">ollama/Dockerfile</a>
+  * Image in Docker hub: <a href="https://hub.docker.com/repository/docker/alaasalmo/ollama/general">https://hub.docker.com/repository/docker/alaasalmo/ollama/general</a>
+
+  <b>Commands to build the image:</b>
 ```	 
    cd ollama
    docker build -t ollama:1.0.0.0 .
@@ -55,10 +60,10 @@ We need to the two images from scratch
    docker push alaasalmo/ollama:1.0.0.0
 ```
 
-Image in Docker hub: <a href="https://hub.docker.com/repository/docker/alaasalmo/ollama/general">https://hub.docker.com/repository/docker/alaasalmo/ollama/general</a>
-
   * Build Ollama UI image
-  File: <a href="ollama-llm-ui/Dockerfile">ollama-llm-ui/Dockerfile</a>
+  * File: <a href="ollama-llm-ui/Dockerfile">ollama-llm-ui/Dockerfile</a>
+  * Image in Docker hub: <a href="https://hub.docker.com/repository/docker/alaasalmo/ollama-ui/general">https://hub.docker.com/repository/docker/alaasalmo/ollama-ui/general</a>
+
 
 ```
 git clone https://github.com/jakobhoeg/nextjs-ollama-llm-ui.git
@@ -73,8 +78,6 @@ cd ollama-llm-ui
     docker tag c82623967cae alaasalmo/ollama-ui:1.0.0.0
     docker push alaasalmo/ollama-ui:1.0.0.0
 ```  
-Image in Docker hub: <a href="https://hub.docker.com/repository/docker/alaasalmo/ollama-ui/general">https://hub.docker.com/repository/docker/alaasalmo/ollama-ui/general</a>
-
   * Build and run images with Docker to check the images(if you don't want to check the images, you can pass this part):
      
 ##### Run the docker images
