@@ -12,9 +12,9 @@
 
 
 <p><b>Comparison: ChatGPT vs. Ollama</b>
-In this post, we compare ChatGPT—OpenAI’s well-known cloud-based platform—with Ollama. ChatGPT is a proprietary service that runs exclusively in the cloud. It allows limited customization of its models through OpenAI's fine-tuning tools and is not open source.
+To better understand Ollama, it’s useful to compare it with ChatGPT. ChatGPT is developed and operated by OpenAI as a proprietary, cloud-based service. It is not open-source and offers only limited customization through OpenAI’s fine-tuning tools. However, ChatGPT supports Retrieval-Augmented Generation (RAG) with minimal configuration, making it easy to integrate into RAG workflows via the OpenAI API.
 </p>
-<p>In contrast, Ollama is fully open source and supports both local and cloud deployments. It runs on Windows, macOS, and Linux. Developers can use and fine-tune models using techniques such as LoRA and QLoRA to create custom models tailored to specific tasks.</p>
+<p>In contrast, Ollama is fully open-source and supports both local and cloud deployments. It runs on Windows, macOS, and Linux, making it accessible across major platforms. Developers can fine-tune models using techniques such as LoRA and QLoRA to create custom models tailored to specific tasks. Additionally, Ollama can be used with Retrieval-Augmented Generation (RAG) and a vector database to enhance retrieval capabilities and extend the language model’s knowledge base with external documents.</p>
 
 <p><b>Building Ollama on Kubernetes (Minikube)</b>
 In our project, we demonstrate how to deploy the Ollama platform using Kubernetes (Minikube), creating a container-based solution. This approach allows the system to scale vertically (scale-up) or horizontally (scale-out) based on workload demand. It also enables deploying separate Ollama containers for different teams or users, providing better isolation and flexibility. </p>
@@ -46,30 +46,37 @@ Kubernetes also enables horizontal and vertical scaling. If more resources are n
 #### Build Ollama with Docker 
 We need to the two images from scratch
   * Build Ollama platform image
-  File: ollama/Dockerfile
+  File: <a href="ollama/Dockerfile">ollama/Dockerfile</a>
   <b>Commands:</b>
 ```	 
-     cd ollama
-	 docker build -t ollama:1.0.0.0 .
-     docker images
-     docker tag <image-id> alaasalmo/ollama:1.0.0.0
-	 docker tag c82623967cae alaasalmo/ollama:1.0.0.0
-     docker push alaasalmo/ollama:1.0.0.0
+   cd ollama
+   docker build -t ollama:1.0.0.0 .
+   docker images
+   docker tag <image-id> alaasalmo/ollama:1.0.0.0
+   docker tag c82623967cae alaasalmo/ollama:1.0.0.0
+   docker push alaasalmo/ollama:1.0.0.0
 ```
+
+Image in Docker hub: <a href="https://hub.docker.com/repository/docker/alaasalmo/ollama/general">https://hub.docker.com/repository/docker/alaasalmo/ollama/general</a>
+
   * Build Ollama UI image
+  File: <a href="ollama-llm-ui/Dockerfile">ollama-llm-ui/Dockerfile</a>
+
 ```
 git clone https://github.com/jakobhoeg/nextjs-ollama-llm-ui.git
 mv nextjs-ollama-llm-ui ollama-llm-ui
 cd ollama-llm-ui
 ```  
 ```   
-     cd ollama-llm-ui
-	 docker build -t ollama-ui .
-     docker images
-     docker tag <image-id> alaasalmo/ollama-ui:1.0.0.0
-     docker tag c82623967cae alaasalmo/ollama-ui:1.0.0.0
-     docker push alaasalmo/ollama-ui:1.0.0.0
-```     
+    cd ollama-llm-ui
+    docker build -t ollama-ui .
+    docker images
+    docker tag <image-id> alaasalmo/ollama-ui:1.0.0.0
+    docker tag c82623967cae alaasalmo/ollama-ui:1.0.0.0
+    docker push alaasalmo/ollama-ui:1.0.0.0
+```  
+Image in Docker hub: <a href="https://hub.docker.com/repository/docker/alaasalmo/ollama-ui/general">https://hub.docker.com/repository/docker/alaasalmo/ollama-ui/general</a>
+
   * Build and run images with Docker to check the images(if you don't want to check the images, you can pass this part):
      
 ##### Run the docker images
@@ -162,36 +169,70 @@ http://127.0.0.1:53584
 <img align="center" src="img\main-page.png" wodth=90%><br>
 </p>
 
-* <b>Python</b>
+* <b>Upload differenct models and check Ollama UI</b>
+  We will upload the models to the Ollama pod:
+  ```
+  kubectl exec -it $(kubectl get pods -l app=ollama -o jsonpath='{.items[0].metadata.name}') -- ollama pull llama3
+  kubectl exec -it $(kubectl get pods -l app=ollama -o jsonpath='{.items[0].metadata.name}') -- ollama pull llama3.2:1b
+  ```
+  To check the model list, we run:
+  ```
+  kubectl exec -it $(kubectl get pods -l app=ollama -o jsonpath='{.items[0].metadata.name}') -- ollama list
+  ```   
+ 
+  We will upload the models to the Ollama pod in air gapped system(oof line system):
+   
+  ```
+   kubectl exec -it $(kubectl get pods -l app=ollama -o jsonpath='{.items[0].metadata.name}') bash
+   cd ~/.ollama
+   tar czf ollama-models.tar.gz models modelfile-store.json
+   kubectl cp $(kubectl get pods -l app=ollama -o jsonpath='{.items[0].metadata.name}'):/root/.ollama/ollama-models.tar.gz ollama-models.tar.gz
+   ```
 
-Get the URL from command : "minikube service ollama-service --url"
+   After you get the copy of models (compressed file) to the /root/.ollama/ and tar the file:
+   ```
+   kubectl cp ollama-models.tar.gz $(kubectl get pods -l app=ollama -o jsonpath='{.items[0].metadata.name}'):/root/.ollama/ollama-models.tar.gz
+   kubectl exec -it $(kubectl get pods -l app=ollama -o jsonpath='{.items[0].metadata.name}') bash
+   cd ~/.ollama
+   tar xzf ollama-models.tar.gz
+   ollama list
+  ```
+   After you run the curl command, you will see the list of models
+  ```
+   curl http://127.0.0.1:58850/api/tags
+  ```
 
-```
-import requests
+* <b>Build API python code to access Ollama platform </b>
 
-# Ollama endpoint
-OLLAMA_URL = "http://127.0.0.1:54306"
+   Get the URL from command : "minikube service ollama-service --url"
 
-# The model you want to use
-MODEL_NAME = "llama3.2:1b"
+  ```
 
-# Prompt to send
-prompt = "What is the capital of Canada?"
+  import requests
 
-# Request payload
-data = {
-    "model": MODEL_NAME,
-    "prompt": prompt,
-    "stream": False
-}
+  # Ollama endpoint
+  OLLAMA_URL = "http://127.0.0.1:54306"
 
-# Make POST request to Ollama's generate endpoint
-response = requests.post(f"{OLLAMA_URL}/api/generate", json=data)
+  # The model you want to use
+  MODEL_NAME = "llama3.2:1b"
 
-# Print the result
-if response.status_code == 200:
-    result = response.json()
-    print("🧠 Model response:\n", result["response"])
-else:
-    print(f"❌ Error {response.status_code}: {response.text}")
-```
+  # Prompt to send
+  prompt = "What is the capital of Canada?"
+
+  # Request payload
+  data = {
+      "model": MODEL_NAME,
+      "prompt": prompt,
+      "stream": False
+  }
+
+  # Make POST request to Ollama's generate endpoint
+  response = requests.post(f"{OLLAMA_URL}/api/generate", json=data)
+
+  # Print the result
+  if response.status_code == 200:
+      result = response.json()
+      print("🧠 Model response:\n", result["response"])
+  else:
+      print(f"❌ Error {response.status_code}: {response.text}")
+  ```
