@@ -47,7 +47,7 @@ The diagram below illustrates how Ollama with Kubernentes can run on separate no
 
 <p align="center">
 <img align="center" src="img\kubernetes-ollama.jpg" wodth=90%><br>
-Run Ollama with Kubernetes on different nodes
+Run Ollama with Kubernetes on different nodes (servers)
 </p>
 
 #### Build Ollama with Docker 
