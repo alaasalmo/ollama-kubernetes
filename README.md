@@ -27,8 +27,11 @@ Ollama Application Pod – responsible for running the core model services.
 
 GUI Pod – providing the user interface for chatting.
 
+The diagram below illustrates how Ollama runs in containers orchestrated by Kubernetes. It shows two pods  ollama and ollama-llm-ui along with three services and a distributed storage setup using Persistent Volumes (PV) and Persistent Volume Claims (PVC).
+
 <p align="center">
 <img align="center" src="img\ollama-diagram.jpg" wodth=90%><br>
+Omllama components with container base
 </p>
 
 We created two custom Docker images from scratch—one for each pod—and pushed them to Docker Hub. These images are then used to deploy the corresponding pods and services on Kubernetes.
@@ -38,10 +41,13 @@ In this post, we will focuses on building the Ollama platform within Kubernetes.
 #### Why building Ollama on Kubernentes
 Instead of running Ollama on a single virtual machine or physical server shared by multiple users, deploying it on Kubernetes provides greater flexibility, scalability, and isolation. With Kubernetes, we can distribute Ollama containers across multiple nodes (servers), allowing each user to access a dedicated pod or instance. This setup improves performance isolation, ensuring one user's workload doesn't impact another's.
 
-Kubernetes also enables horizontal and vertical scaling. If more resources are needed, we can scale out by adding more pods or scale up by increasing resources for existing pods. Conversely, during low usage, we can scale down to conserve resources. This dynamic resource management helps maintain consistent application. See the diagram below explain how Ollama runs on different nodes with different Ollama pods
+Kubernetes also enables horizontal and vertical scaling. If more resources are needed, we can scale out by adding more pods or scale up by increasing resources for existing pods. Conversely, during low usage, we can scale down to conserve resources. This dynamic resource management helps maintain consistent application. See the diagram below explain how Ollama runs on different nodes with different Ollama pods.
+
+The diagram below illustrates how Ollama with Kubernentes can run on separate nodes (servers), allowing us to assign a dedicated instance of the Ollama application to each user or department. This setup ensures isolation and prevents resource conflicts, such as memory, CPU, or I/O limitations, by avoiding shared usage on a single server.
 
 <p align="center">
 <img align="center" src="img\kubernetes-ollama.jpg" wodth=90%><br>
+
 </p>
 
 #### Build Ollama with Docker 
@@ -71,29 +77,29 @@ mv nextjs-ollama-llm-ui ollama-llm-ui
 cd ollama-llm-ui
 ```  
 ```   
-    cd ollama-llm-ui
-    docker build -t ollama-ui .
-    docker images
-    docker tag <image-id> alaasalmo/ollama-ui:1.0.0.0
-    docker tag c82623967cae alaasalmo/ollama-ui:1.0.0.0
-    docker push alaasalmo/ollama-ui:1.0.0.0
+cd ollama-llm-ui
+docker build -t ollama-ui .
+docker images
+docker tag <image-id> alaasalmo/ollama-ui:1.0.0.0
+docker tag c82623967cae alaasalmo/ollama-ui:1.0.0.0
+docker push alaasalmo/ollama-ui:1.0.0.0
 ```  
-  * Build and run images with Docker to check the images(if you don't want to check the images, you can pass this part):
+  * Build and run images with Docker to check the images(if you don't want to check the images, you can pass this part)
      
 ##### Run the docker images
 
 ```
-    docker network create --driver bridge llm-net 	
+docker network create --driver bridge llm-net 	
 	
-    docker run -d -p 8080:3000 \
-    --network llm-net \
-    --add-host=host.docker.internal:host-gateway \
-    -e OLLAMA_URL=http://ollama:11434 \
-    --name nextjs-ollama \
-    nextjs-ollama-ui
+docker run -d -p 8080:3000 \
+--network llm-net \
+--add-host=host.docker.internal:host-gateway \
+-e OLLAMA_URL=http://ollama:11434 \
+--name nextjs-ollama \
+nextjs-ollama-ui
 
-    mkdir ~/.ollama 
-    docker run -d --name ollama --network llm-net -v ~/.ollama:/root/.ollama -p 11434:11434 ollama/ollama 
+mkdir ~/.ollama 
+docker run -d --name ollama --network llm-net -v ~/.ollama:/root/.ollama -p 11434:11434 ollama/ollama 
 ```
 
 ##### Check the docker run
@@ -103,16 +109,16 @@ In the web browser use http://localhost:8080, you have to see the Ollama page
 ```
 
 #### Build Ollama with Minikube
-We need to the minikube with:
+We need to start the minikube with:
 ```
-minikube start --memory 9216 --cpus 5
+minikube start --memory 9216 --cpus 4
 ```
-
+We start the minikube with 9 Giga byte memory and 4 CPUs (this will depened on the hosting capacitiy)
 ##### Build PV and PVC storage
 <a href="storage/pv.yaml">storage/pv.yaml</a>
 <a href="storage/pvc.yaml">storage/pvc.yaml</a>
 
-Build the share the folder for PV
+Build the folder for PV in minikube
 ```
 minikube ssh
 sudo mkdir /mnt
@@ -141,13 +147,13 @@ kubectl apply -f ollama-llm-ui/ollama-llm-ui.yaml
 ```
 ##### Run external services for Ollama GUI access
 
-Get the services with No
+Get the services with NodePort
 
 ```
 kubectl get services | grep NodePort
 ```
 
-Start the external service for GUI 
+After you see the services. You can start the external service for GUI 
 ```
 minikube service ollama-llm-ui --url
 ```
@@ -181,7 +187,7 @@ http://127.0.0.1:53584
   kubectl exec -it $(kubectl get pods -l app=ollama -o jsonpath='{.items[0].metadata.name}') -- ollama list
   ```   
  
-  We will upload the models to the Ollama pod in air gapped system(oof line system):
+  We will upload the models to the Ollama pod in air gapped system(off line system):
    
   ```
    kubectl exec -it $(kubectl get pods -l app=ollama -o jsonpath='{.items[0].metadata.name}') bash
@@ -190,7 +196,7 @@ http://127.0.0.1:53584
    kubectl cp $(kubectl get pods -l app=ollama -o jsonpath='{.items[0].metadata.name}'):/root/.ollama/ollama-models.tar.gz ollama-models.tar.gz
    ```
 
-   After you get the copy of models (compressed file) to the /root/.ollama/ and tar the file:
+   After you get the copy of models (compressed file) to the /root/.ollama/ and tar (uncompress file):
    ```
    kubectl cp ollama-models.tar.gz $(kubectl get pods -l app=ollama -o jsonpath='{.items[0].metadata.name}'):/root/.ollama/ollama-models.tar.gz
    kubectl exec -it $(kubectl get pods -l app=ollama -o jsonpath='{.items[0].metadata.name}') bash
