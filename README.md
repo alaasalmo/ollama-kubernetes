@@ -2,7 +2,7 @@
 # <p width=600 align="center"><b>Building Ollama with Minikube</b></p>
 
 <p align="center">
-<img align="center" src="img\main-header.jpg" wodth=90%><br>
+<img align="center" src="img\main.png-header-2.png" wodth=90%><br>
 </p>
 
 <p><b>Ollama</b> is an open-source platform designed for deploying and running large language models (LLMs) locally. It enables developers to integrate AI models into their applications while maintaining privacy, security, and high performance—without relying on external cloud services.</p>
