@@ -30,7 +30,7 @@ spec:
       volumes:
         - name: ollama-storage
           persistentVolumeClaim:
-            claimName: task-pv-claim
+            claimName: task-pvc-claim
 
 ---
 apiVersion: v1
