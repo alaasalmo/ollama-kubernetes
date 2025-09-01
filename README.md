@@ -121,7 +121,7 @@ We start the minikube with 9 Giga byte memory and 4 CPUs (this will depened on t
 Build the folder for PV in minikube
 ```
 minikube ssh
-sudo midir -p /mnt/data
+sudo mkdir -p /mnt/data
 sudo chmod 777 -R /mnt/data/ollama
 exit
 ```
